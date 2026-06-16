@@ -2,38 +2,83 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>My Web Map</title>
+  <title>Big-Box Scoring</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://googleapis.com/css2?family=Inter:ital,wght@0,200;0,400;0,600;1,200;1,400;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter" rel="stylesheet">
   <style>
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    html,
+    body { margin: 0; padding: 0; font-family: "Inter", sans-serif; font-weight:400px;}
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
     .legend {
       position: absolute;
       bottom: 24px;
       left: 24px;
-      background: white;
-      padding: 12px;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-      font-size: 13px;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 15px;
+      font-style:normal;
+      font-size: 18px;
       z-index: 1;
+      line-height: 1.4;
     }
+
+    .legend-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .legend-key {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      flex: 0 0 12px;
+    }
+
+    .mapboxgl-popup {
+        max-width: 400px;
+        font:
+            12px/20px 'Inter',
+            Arial,
+            Helvetica,
+            sans-serif;
+    }
+    .map-logo {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 2;
+        padding: 8px;
+     }
+
+    .map-logo img {
+        display: block;
+        width: 225px;
+        height: auto;
+      }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <div class="legend">
-    <strong>Legend</strong><br>
-    <span style="display:inline-block;width:12px;height:12px;background:#2b83ba;"></span>
-    Layer A<br>
-    <span style="display:inline-block;width:12px;height:12px;background:#abdda4;"></span>
-    Layer B
-  </div>
+  <div id="legend" class="legend"></div>
 
-  <script>
+  <a class="map-logo" href="https://images.squarespace-cdn.com/content/v1/66aa6774a669d97d275cb249/1722443652763-YF1AXKY8F64N6D561DL5/VENNFROG_LOGO_HORZ_COLOR+%282%29.png?format=1500w" target="_blank" rel="noopener">
+  <img src="vennfrog_two_color.svg" alt="Logo">
+  </a>
+
+<script>
     mapboxgl.accessToken = 'pk.eyJ1IjoicGV0cm9sYXR1bSIsImEiOiJjbXFmanAzdDYxbjdvMnFxMzVuMWo4cW43In0.7XRGgEj6Y1Jl_0WWuwoLhA';
 
     const map = new mapboxgl.Map({
@@ -44,6 +89,54 @@
     });
 
     map.addControl(new mapboxgl.NavigationControl());
-  </script>
+    
+    map.on('load', () => {
+    const popupLayer = 'Superfund Sites';
+
+    map.on('click', popupLayer, (e) => {
+      const feature = e.features[0];
+
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(`
+          <strong>${feature.properties.Site_Name || 'Feature'}</strong><br>
+          Site Score:  ${feature.properties.Site_Score || ''}
+        `)
+        .addTo(map);
+    });
+
+    map.on('mouseenter', popupLayer, () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', popupLayer, () => {
+      map.getCanvas().style.cursor = '';
+    });
+  });
+
+    const legendItems = [
+    { label: 'Superfund Site', color: '#5ef240' },
+    { label: '100-Year Floodplain (High-Risk)', color: '#5da8fe' },
+    { label: 'Layer C', color: '#fdae61' },
+    { label: 'Layer D', color: '#d7191c' }
+  ];
+
+  function buildLegend(items) {
+    const legend = document.getElementById('legend');
+
+    legend.innerHTML = `
+      <div class="legend-title">Legend</div>
+      ${items.map(item => `
+        <div class="legend-row">
+          <span class="legend-key" style="background:${item.color};"></span>
+          <span>${item.label}</span>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  buildLegend(legendItems);
+
+</script>
 </body>
 </html>
