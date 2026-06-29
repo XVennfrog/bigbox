@@ -1,50 +1,30 @@
-function buildBigBoxPopupHTML (properties){
+function buildBigBoxScoresHTML (properties){
     return `
-    <strong>${properties.Site_Name || 'Feature'}</strong><br>
-    Parcel ID: ${properties.parcel_id || 'n/a'}<br>
-    Lot Area (acres): ${properties.lot_area || 'n/a'}<br>
-    Last Sale Date: ${properties.last_sale_date || 'n/a'}<br>
-    Last Sale Price ($): ${properties.last_sale_price || 'n/a'}<br>
-    Class: ${properties.class || 'n/a'}<br>
-    Use: ${properties.use || 'n/a'}<br>
-    URA Property? ${properties.ura_property || 'No'}<br>
-    Average Slope (%): ${properties.average_slope.toFixed(1) || 'n/a'}<br>
-    Unsatisfied Lien Count: ${properties.unsatisfied_lien_count || 'n/a'}<br>
-    Total Lien Amount ($): ${properties.total_lien_amount.toLocaleString('en-US') || '$0'}<br>
-    <strong>Final Score: ${properties.final_score.toFixed(2) || 'n/a'}</strong>
-`
+    <strong class="mapboxgl-popup-title"> ${properties.address || 'Feature'} </strong><br>
+    <div class="mapboxgl-popup-body">
+    <strong class="mapboxgl-popup-subheading"> Parcel ID </strong>: ${properties.parcel_id || 'n/a'} <br>
+    <strong class="mapboxgl-popup-subheading"> Lot Area (acres)</strong>: ${properties.lot_area || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> Last Sale Date</strong>: ${properties.last_sale_date || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> Last Sale Price ($)</strong>: $${properties.last_sale_price || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> Class</strong>: ${properties.class || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> Use</strong>: ${properties.use || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> URA Property?</strong> ${properties.ura_property || 'No'}<br>
+    <strong class="mapboxgl-popup-subheading"> Average Slope</strong>: ${properties.average_slope.toFixed(1) || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> Unsatisfied Lien Count</strong>: ${properties.unsatisfied_lien_count || 'n/a'}<br>
+    <strong class="mapboxgl-popup-subheading"> Total Lien Amount</strong>: $${properties.total_lien_amount.toLocaleString('en-US') || '$0'}<br>
+    <strong class="mapboxgl-popup-final-score">Final Score: ${properties.final_score.toFixed(2) || 'n/a'}</strong>
+    </div>
+    `
 }
 
-function buildCoStarListHTML (properties){
-    return `
-    <strong>${properties['Property Address'] || 'Feature'}</strong><br>
-    Parcel ID: ${properties.Parcel_ID || 'n/a'}<br>
-    Total Available Space (SF): ${properties['Total Available Space (SF)'] || 'n/a'}<br>
-    Year Built: ${properties['Year Built'] || 'n/a'}<br>
-    Year Renovated: ${properties['Year Renovated'] || 'n/a'}<br>
-    Tenancy: ${properties['Tenancy'] || 'n/a'}<br>
-    For Sale Price: ${properties['For Sale Price'] || 'n/a'}<br>
-    For Sale Status: ${properties['For Sale Status'] || 'n/a'}<br>
-    Last Sale Date: ${properties['Last Sale Date'] || 'n/a'}<br>
-    Last Sale Price: ${properties['Last Sale Price'] || 'n/a'}<br>
-    Leasing Company Contact: ${properties['Leasing Company Contact'] || 'n/a'}<br>
-    Leasing Company Name: ${properties['Leasing Company Name'] || 'n/a'}<br>
-    Sale Company Contact: ${properties['Sale Company Contact'] || 'n/a'}<br>
-    Sale Company Name: ${properties['Sale Company Name'] || 'n/a'}<br>
-    Market Name: ${properties['Market Name'] || 'n/a'}<br>
-    Lot Area (acres): ${properties.lot_area || 'n/a'}<br>
-    Last Sale Date: ${properties.last_sale_date || 'n/a'}<br>
-    Last Sale Price ($): ${properties.last_sale_price || 'n/a'}<br>
-`
-}
-
-window.popupConfigs =[
+export const popupConfigs =[
     {
       layerId: 'Big-Box Scores',
-      buildHTML: buildBigBoxPopupHTML
-    },
-    {
-      layerId: 'CoStar List',
-      buildHTML: buildCoStarListHTML
+      buildHTML: buildBigBoxScoresHTML
     }
 ]
+
+/*
+    Owner Address: ${formatAddress(properties.owner_address, properties.owner_city) || 'n/a'}<br>
+
+*/

@@ -1,33 +1,54 @@
 // 0. Legend-Building Functions
-function buildLegend(groups, map){
+export function buildLegend(legendConfig, map){
     const legend = document.getElementById('legend');
 
     legend.innerHTML = `
     <div class ="legend-title">Layers</div>
 
-    ${groups.map(group => `
-        <details class="legend-group" ${group.open ? 'open' : ''}>
-            <summary class ="legend-group-title">${group.title}</summary>
+    <div class="legend-scroll">
+      ${legendConfig.ungroupedLayers
+        .map(layer => buildLegendLayer(layer))
+        .join('')}
 
-            <div class="legend-group-body">
-            ${group.layers.map(layer => buildLegendLayer(layer)).join('')}
-            </div>
-        </details>
-    `).join('')}
+      ${legendConfig.groups
+        .map(group => buildLegendGroup(group))
+        .join('')}
+    </div>
     `;
 
-    groups.forEach(group => {
-        group.layers.forEach(layer => {
-            initializeLayerToggle(layer, map);
-        });
-
+    legendConfig.ungroupedLayers.forEach(layer => {
+      initializeLayerToggle (layer, map);
     });
+
+    legendConfig.groups.forEach(group => {
+      group.layers.forEach(layer => {
+        initializeLayerToggle(layer, map);
+      });
+    });
+
+    updateLegendActiveState();
+}
+
+function buildLegendGroup(group){
+  return `
+  <details class="legend-group" ${group.defaultVisible ? 'open' : ''}>
+    <summary class="legend-group-title">
+      <span class="legend-group-bar></span>
+      <span class="legend-group-label">${group.title}</span>
+    </summary>
+
+    <div class="legend-group-body">
+      ${group.layers.map(layer => buildLegendLayer(layer)).join('')}
+    </div>
+  </details>
+  `;
 }
 
 function buildLegendLayer(layer) {
   return `
     <div class="legend-layer">
       <label class="legend-row ${layer.legendType === 'nested' ? 'legend-row-parent' : ''}" style="--legend-color:${layer.color || 'transparent'};">
+        
         <input
           class="legend-checkbox"
           type="checkbox"
@@ -36,7 +57,9 @@ function buildLegendLayer(layer) {
           ${layer.defaultVisible ? 'checked' : ''}
         >
 
-        ${layer.legendType === 'nested' ? '' : buildLegendIcon(layer)}
+        <span class= "legend-layer-bar" aria-hidden="true"></span>
+
+        ${buildLegendIcon(layer)}
 
         <span class="legend-layer-name">${layer.label}</span>
       </label>
@@ -47,6 +70,10 @@ function buildLegendLayer(layer) {
 }
 
 function buildLegendIcon(item) {
+  if(item.legendType == 'nested'){
+    return ``;
+  }
+
   if (item.symbol === 'point') {
     return `
       <svg class="legend-icon legend-icon-point" viewBox="0 0 20 20" aria-hidden="true">
@@ -63,7 +90,11 @@ function buildLegendIcon(item) {
     `;
   }
 
-  return ``;
+  return `
+    <svg class="legend-icon legend-icon-fill" viewBox="0 0 20 20" aria-hidden="true" style="color:${item.color};">
+      <rect x="4" y="4" width="12" height="12" fill="currentColor"></rect>
+    </svg>
+  `;
 }
 
 function buildNestedLegend(layer) {
@@ -72,7 +103,7 @@ function buildNestedLegend(layer) {
   }
 
   return `
-    <div class="nested-legend">
+    <div class="nested-legend" aria-hidden="true">
       ${layer.stops.map(stop => `
         <div class="nested-legend-row">
           ${buildLegendIcon({
@@ -120,7 +151,16 @@ function setLayerVisibility(layer, map, isVisible) {
 function updateLegendActiveState() {
   document.querySelectorAll('.legend-layer').forEach(layerEl => {
     const checkbox = layerEl.querySelector('input[type="checkbox"]');
-    layerEl.classList.toggle('is-active', checkbox && checkbox.checked);
+    const isActive = Boolean(checkbox && checkbox.checked);
+
+    layerEl.classList.toggle('is-active', isActive);
+
+    const nestedLegend = layerEl.querySelector('.nested-legend');
+
+    if(nestedLegend){
+      nestedLegend.classList.toggle('is-open', isActive);
+      nestedLegend.setAttribute('aria-hidden', String(!isActive));
+    }
   });
 
   document.querySelectorAll('.legend-group').forEach(groupEl => {

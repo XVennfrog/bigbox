@@ -1,5 +1,5 @@
 // 1. Pop-up Building Functions
-function setupPopups(popupConfigs, map){
+export function setupPopups(popupConfigs, map){
     popupConfigs.forEach(config=>{
         if (!map.getLayer(config.layerId)){
             console.error(`Popup layer not found: ${config.layerId}`);
@@ -8,6 +8,8 @@ function setupPopups(popupConfigs, map){
 
         map.on('click', config.layerId, (e) =>{
             const feature = e.features[0];
+
+            console.log(e.features[0].properties);
 
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
